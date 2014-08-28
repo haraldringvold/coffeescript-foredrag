@@ -55,7 +55,8 @@
           <p>Programmeringsspråk som kompilerer til Javascript</p>
 
           <aside class="notes">
-            Kompilering til js; kan brukes med alle vanlige javascript bibliotek
+            Kompilering til js; kan brukes med alle vanlige javascript bibliotek <br>
+            Debug: SourceMaps
           </aside>
 
         </section>
@@ -66,15 +67,14 @@
             <p><em>"CoffeeScript is an attempt to expose the good parts of JavaScript in a simple way."</em></p>
             <p>coffeescript.org</p>
           </div>
-
-          <aside class="notes">
-            Javascript har noen kinks, variabler lekker scope, masse bruk av anynome funksjoner <br>
-            Kompilering til js; kan brukes med alle vanlige javascript bibliotek
-          </aside>
         </section>
 
         <section>
           <img src="images/JavaScript-the-good-parts.jpg" alt="">
+
+          <aside class="notes">
+            Javascript har noen kinks, variabler lekker scope, 'this', masse bruk av anynome funksjoner
+          </aside>
         </section>
 
         <section>
@@ -85,10 +85,6 @@
             >
             <li>Enklere og penere syntaks</li>
           </ul>
-
-          <aside class="notes">
-            Debug: SourceMaps
-          </aside>
         </section>
 
         <section>
@@ -101,9 +97,50 @@
         </section>
 
         <section>
-
           <section>
-            <p>Javascript</p>
+            <pre>
+              <code class="javascript">
+var harald = {
+  høyde: 175,
+  by: 'Lyngdal',
+  erfaring: 2,
+  alder: 24
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <pre>
+              <code class="coffeescript">
+harald =
+  høyde: 175
+  by: 'Lyngdal'
+  erfaring: 2
+  alder: 24
+              </code>
+            </pre>
+          </section>
+        </section>
+
+
+        <section>
+          <section>
+            <pre>
+              <code class="javascript">
+"Jeg er fra "+ harald.by + ". Hvor er du fra?"
+              </code>
+            </pre>
+          </section>
+          <section>
+            <pre>
+              <code class="coffeescript">
+"Jeg er fra #{harald.by}. Hvor er du fra?"
+              </code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
             <pre>
               <code class="javascript">
 $(function() {
@@ -114,7 +151,6 @@ $(function() {
           </section>
 
           <section>
-            <p>Coffeescript</p>
             <pre>
               <code class="coffeescript">
 $ ->
@@ -122,22 +158,112 @@ $ ->
               </code>
             </pre>
           </section>
+
+          <section>
+            <pre>
+              <code class="javascript" style="font-size: 0.82em">
+var PageHandler = {
+
+  id: "123456",
+
+  init: function() {
+      document.addEventListener("click", (function(event) {
+          this.doSomething(event.type);
+      }), false);
+  },
+
+  doSomething: function(type) {
+      console.log("Handling " + type  + " for " + this.id);
+  }
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <pre>
+              <code class="coffeescript" style="font-size: 0.82em">
+PageHandler =
+    id: "123456"
+
+    init: ->
+      document.addEventListener "click", event ->
+          this.doSomething event.type
+        , false
+
+    doSomething: (type) ->
+        console.log "Handling #{type} for #{this.id}"
+            </code>
+            </pre>
+          </section>
+
+
+          <section>
+            <pre>
+              <code class="javascript" style="font-size: 0.82em">
+PageHandler =
+    id: "123456"
+
+    init: ->
+      document.addEventListener "click", event =>
+          this.doSomething event.type
+        , false
+
+    doSomething: (type) ->
+        console.log "Handling #{type} for #{this.id}"
+              </code>
+            </pre>
+          </section>
         </section>
 
         <section>
           <pre>
-              <code class="coffeescript">
-loler = (name) ->
-  console.log "LOL, #{name}!"
-
-loler('harald')
-
-              </code>
-            </pre>
+            <code class="coffeescript">
+list = [1,2,3,4,5]
+for num in list
+  alert(numb)
+            </code>
+          </pre>
         </section>
 
         <section>
-          <h2>Stemning i miljøet</h2>
+          <section>
+            <pre>
+              <code class="javascript">
+if harald.height < 180
+  alert "Haha! Dverg!"
+else
+  alert "Good on you, lad!"
+              </code>
+            </pre>
+          </section>
+          <section>
+            <pre>
+              <code class="javascript"" style="font-size: 0.9em"">
+if harald.height < 180 then alert "jaha" else alert "ok"
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <pre>
+              <code class="coffeescript">
+race = (winner, runners...) ->
+  alert runners
+
+race 'harald', 'nico', 'geir', 'jonny'
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <iframe src="/CoffeeScript.html" frameborder="0" width="1200" height="600"></iframe>
+        </section>
+
+        <section>
+          <h2>Mottagelse</h2>
           <p>Noen er ikke så glade i det</p>
           <p>Stort i Rails-miljøet</p>
         </section>
@@ -147,26 +273,6 @@ loler('harald')
           <p>EcmaScript 6</p>
           <p>TypeScript</p>
           <p>Baily (Bekker)</p>
-        </section>
-
-        <section>
-          <div class="contents repl_wrapper">
-            <div class="code">
-              <div class="screenshadow tl"></div>
-              <div class="screenshadow tr"></div>
-              <div class="screenshadow bl"></div>
-              <div class="screenshadow br"></div>
-              <div id="repl_source_wrap">
-                <textarea id="repl_source" rows="100" spellcheck="false" data-emoji_font="true" style="font-family: monospace">alert "Hello CoffeeScript!"</textarea>
-              </div>
-              <div id="repl_results_wrap"><pre id="repl_results" class="" ></pre></div>
-              <br class="clear">
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <iframe src="/CoffeeScript-Try.html" frameborder="0" width="1200" height="600"></iframe>
         </section>
 
       </div> <!-- /.slides -->

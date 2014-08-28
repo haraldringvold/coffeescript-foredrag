@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- saved from url=(0079)file:///Users/harald/code/presentations/coffeescript-foredrag/CoffeeScript.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <title>CoffeeScript</title>
+  <link rel="canonical" href="file:///Users/harald/code/presentations/coffeescript-foredrag/CoffeeScript-Try_files/CoffeeScript-Try.html">
+  <link rel="stylesheet" type="text/css" href="./CoffeeScript_files/docs.css">
+  <link rel="stylesheet" type="text/css" href="./CoffeeScript_files/tomorrow.css">
+  <link rel="shortcut icon" href="http://coffeescript.org/documentation/images/favicon.ico">
+<style type="text/css"></style><style>img.chromoji { width:1em !important; height:1em !important; }.chromoji-font, #chromoji-font { font-size:1em !important; }</style></head>
+<body>
+
+
+
+  <div id="">
+
+
+    <div class="navigation try active">
+
+      <div class="contents repl_wrapper">
+        <div class="code">
+          <div class="screenshadow tl"></div>
+          <div class="screenshadow tr"></div>
+          <div class="screenshadow bl"></div>
+          <div class="screenshadow br"></div>
+          <div id="repl_source_wrap">
+            <textarea id="repl_source" rows="100" spellcheck="false">electric_mayhem = [
+  { name: "Doctor Teeth", instrument: "piano" },
+  { name: "Janice", instrument: "lead guitar" },
+  { name: "Sgt. Floyd Pepper", instrument: "bass" },
+  { name: "Zoot", instrument: "sax" },
+  { name: "Lips", instrument: "trumpet" },
+  { name: "Animal", instrument: "drums" }
+  ]
+
+names = (muppet.name for muppet in electric_mayhem)
+
+alert names
+
+# alert "I knew it!" if elvis?
+</textarea>
+          </div>
+          <div id="repl_results_wrap"><pre id="repl_results" class="">
+</pre></div>
+          <div class="minibutton dark run" title="Ctrl-Enter">Run</div>
+          <a class="minibutton permalink" id="repl_permalink" href="file:///Users/harald/code/presentations/coffeescript-foredrag/CoffeeScript.html#try:harald%20%3D%0A%20%20lol%3A%20'lol'">Link</a>
+          <br class="clear">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+
+  <script type="text/coffeescript">
+    sourceFragment = "try:"
+
+    # Set up the compilation function, to run when you stop typing.
+    compileSource = ->
+      source = $('#repl_source').val()
+      results = $('#repl_results')
+      window.compiledJS = ''
+      try
+        window.compiledJS = CoffeeScript.compile source, bare: on
+        el = results[0]
+        if el.innerText
+          el.innerText = window.compiledJS
+        else
+          results.text(window.compiledJS)
+        results.removeClass 'error'
+        $('.minibutton.run').removeClass 'error'
+      catch {location, message}
+        if location?
+          message = "Error on line #{location.first_line + 1}: #{message}"
+        results.text(message).addClass 'error'
+        $('.minibutton.run').addClass 'error'
+
+      # Update permalink
+      $('#repl_permalink').attr 'href', "##{sourceFragment}#{encodeURIComponent source}"
+
+    # Listen for keypresses and recompile.
+    $('#repl_source').keyup -> compileSource()
+
+    # Eval the compiled js.
+    evalJS = ->
+      try
+        eval window.compiledJS
+      catch error then alert error
+
+    # Load the console with a string of CoffeeScript.
+    window.loadConsole = (coffee) ->
+      $('#repl_source').val coffee
+      compileSource()
+      $('.navigation.try').addClass('active')
+      false
+
+
+    $('.minibutton.run').click -> evalJS()
+
+
+    # Trigger Run button on Ctrl-Enter
+    $(document.body)
+      .keydown (e) ->
+        closeMenus() if e.which == 27
+        evalJS() if e.which == 13 and (e.metaKey or e.ctrlKey)
+      .click (e) ->
+        return false if $(e.target).hasClass('minibutton')
+
+    compileSource()
+
+  </script>
+
+  <script src="./CoffeeScript_files/jquery-1.6.4.js"></script>
+  <script src="./CoffeeScript_files/coffee-script.js"></script>
+
+
+
+</body></html>
