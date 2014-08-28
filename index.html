@@ -263,7 +263,627 @@ race 'harald', 'nico', 'geir', 'jonny'
         </section>
 
         <section>
-          <h2>Mottagelse</h2>
+          <img src="images/business.png" style="background: none; border:none;"/>
+
+          <h1 class="fragment" style="margin-top: -200px;box-sizing: border-box;">It's business time</h1>
+          <aside class="notes">
+            3 bonger, easter eggs
+            praktiske eksempler
+            coffee over hele fjøla
+            server først
+        </section>
+
+        <section>
+          <section>
+            <h1>Coffeescript server-side</h1>
+            <p> Node.js to the rescue</h1>
+            <aside class="notes">
+              runtime enviroment: RAM/CPU
+              Asynkron I/O Event
+              Vanligvis 1 tråd (RAM er care)
+              Event loop, 100000 tilkoblinger, sjekker kø etter skript
+              Callback-suppe
+              Asynkron tankegang
+            </aside>
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript medium">
+Person.findOne( { 'name.last' : 'Ketchum' },  (err, person) =>
+  return @handleError(err) if (err)
+  console.log "Found user: #{person.name.first} #{person.name.last}"
+)
+Person.otherMethod()
+
+              </code>
+            </pre>
+            <aside class="notes">
+              otherMethod() kan returnere før callback til findOne()
+              Databasen må leses inn fra disk og bespørres
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript">
+express = require 'express'
+app = express()
+app.listen(1337)
+              </code>
+            </pre>
+            <aside class="notes">
+              Mange forskjellige rammeverk, veldig mange bruker Express.
+              Veldig bare-bones, noe som igjen fører til litt jungel - mer om det senere.
+              Modeller, Routing, Auth -> Du fikser alt sjæl.
+              Veldig mye middelware - resource (som i rails), MVC controllers, Passport fo
+              å gjøre det mer håndterbart. Ting går *veldig* fort, tenk Sinatra
+            </aside>
+          </section>
+
+          <section>
+            <pre>
+              <code class="javascript">
+app.get('/', function(req, res) {
+  return res.render('index.jade');
+});
+              </code>
+            </pre>
+            <aside class="notes">
+              Coffeescript og javascript på server-siden.
+              Appen består hovedsaklig av ruter definert på denne måten.
+            </aside>
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript">
+app.get '/', (req, res) ->
+  res.render 'index.jade'
+              </code>
+            </pre>
+            <aside class="notes">
+              Optional parentheses gir rutene et er intuitivt preg. Dette er
+              spesielt nyttig når man har MANGE ruter.
+            </aside>
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript very-small">
+app.get '/', (req, res) ->
+  if req.session.user
+  req.flash 'success', "Authenticated as #{req.session.user.name}"
+  res.redirect '/dashboard'
+
+  res.render 'index.jade',
+    locals:
+      title: 'Home'
+
+app.get '/dashboard', (req, res) ->
+  if req.session.user
+    res.render 'dashboard/index.jade',
+      locals:
+        title: 'Dashboard'
+  else
+    res.redirect '/login'
+
+app.post '/dashboard', (req, res) ->
+  params = req.body
+  if req.session.user
+    user = req.session.user
+    console.log params
+  else
+    res.redirect '/login'
+
+app.get '/login', (req, res) ->
+  if req.session.user
+    req.flash 'success', "Authenticated as #{req.session.user.name}"
+    res.redirect '/dashboard'
+
+  res.render 'index.jade',
+    locals:
+      title: 'Login'
+
+app.post '/login', (req, res) ->
+  params = req.body
+  if params.commit.login
+    db.getDoc params.user.name, (e, doc) ->
+      if e
+        req.flash 'error', 'User does not exist!'
+        res.redirect '/login'
+      if doc
+        salt = "superblahblah--#{params.user.password}"
+        salted_password = hash.sha1 params.user.password, salt
+
+        if doc.password is salted_password
+          req.session.regenerate(() ->
+            req.session.user = params.user
+            res.redirect '/dashboard'
+          )
+        else
+          res.redirect '404'
+  else if params.commit.signup
+    res.redirect '/signup'
+            </code>
+          </pre>
+          <aside class="notes">
+            Som her. Mange, meg selv inkludert, ville nok delt opp
+            denne fila i flere sub-routes - evt inkludert et middleware.
+          </aside>
+          </section>
+
+          <section>
+            <h2>Validering</h2>
+            <pre>
+              <code class="javascript small">
+validateParams = function(params) {
+  for (name in params) {
+    value = params[name];
+    if (!(value.length > 0)) {
+      return {
+        'error': {
+          'message': 'Don\'t just submit an empty form, brah.'
+        }
+      };
+    }
+    if (name === 'username' && !validator.isEmail(value)) {
+      return {
+        'error': {
+          'message': 'Invalid email, brah.'
+        }
+      };
+    }
+  }
+  return null; // No errors, amazing!
+};
+              </code>
+            <pre>
+            <aside class="notes">
+            Validering av input er en veldig vanlig handling, noe som
+            express ikke gir deg noe automatisk. Nok en gang kan man finne
+            middleware som gjør det for deg.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Validering</h2>
+            <pre>
+              <code class="coffeescript small">
+validateParams = (params) ->
+  for name, value of params # object iteration, pretty sweet
+    unless value.length > 0
+      return 'error': 'message': 'Don\'t just submit an empty form, brah.'
+    if name == 'username' && !validator.isEmail(value)
+      return 'error': 'message': 'Invalid email, brah.'
+  null # beer me, brah!
+              </code>
+            <pre>
+              <aside class="notes">
+                Coffeescript gjør koden ganske mye mer oversiktelig, mye
+                takket vare JSON-formatering.
+              </aside>
+          </section>
+
+          <section>
+            <h2>Litt mer avansert</h2>
+            <pre>
+              <code class="javascript small">
+app.post('/login', function(req, res) {
+  var error = validateParams(req.body);
+  if (error != null) {
+    return res.json(JSON.stringify(error));
+  }
+  return findUser({
+    where: {
+      username: req.body.username
+    }
+  }).then(function(user) {
+    if (user == null) {
+      throw new Error('Couldn\'t find a user with that email');
+    }
+    return compare(req.body.password, user.password).then(function(result) {
+      if (!result) {
+        throw new Error('Wrong password, brah.');
+      }
+      return res.json(JSON.stringify({
+        'user': user
+      }));
+    });
+  }).fail(function(error) {
+    return res.json(JSON.stringify({
+      'error': {
+        'message': error.message
+      }
+    }));
+  }).done();
+});
+              </code>
+            </pre>
+            <aside class="notes">
+              Standard route
+              Promises
+            </aside>
+          </section>
+
+          <section>
+            <h2>Litt mer avansert</h2>
+            <pre>
+              <code class="coffeescript small">
+app.post '/login', (req, res) ->
+  error = validateParams(req.body) # remember this guy?
+  return res.json JSON.stringify(error) if error?
+
+  findUser(
+    where:
+      username: req.body.username
+  )
+  .then(
+    (user) ->
+      throw new Error('Couldn\'t find a user with that email') unless user?
+      compare(req.body.password, user.password)
+      .then(
+        (result) ->
+          throw new Error('Wrong password, brah.') unless result
+          res.json JSON.stringify('user': user)
+      )
+  )
+  .fail( (error) -> res.json JSON.stringify('error': 'message': error.message) )
+  .done()
+              </code>
+            </pre>
+            <aside class="notes">
+              Som dere ser så kan coffeescript gjøre ganske mye for å
+              forenkle koden, spesielt når det er JSON involvert.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Enda litt mer</h2>
+            <pre>
+              <code class="javascript small">
+app.post('/signup', function(req, res) {
+  var error;
+  error = validateParams(req.body);
+  if (error != null) {
+    return res.json(JSON.stringify(error));
+  }
+  return findUser({
+    where: {
+      username: req.body.username
+    }
+  }).then(function(user) {
+    if (user) {
+      throw new Error('Username/email already exists.');
+    }
+    return encrypt(10);
+  }).then(function(salt) {
+    return hash(req.body.password, salt);
+  }).then(function(hash) {
+    return createUser({
+      user_id: uuid.v1(),
+      username: req.body.username,
+      password: hash,
+      joined: Date.now()
+    });
+  }).then(function(user) {
+    return res.json(JSON.stringify(user));
+  }).fail(function(error) {
+    return res.json(JSON.stringify({
+      'error': {
+        'message': error.message
+      }
+    }));
+  }).done();
+});
+            </code>
+          </pre>
+          <aside class="notes">
+            Fort havner man i en posisjon der man kan spare MASSE
+            kode på å bytte til coffeescript.
+          </aside>
+        </section>
+
+        <section>
+          <h1>Okay, dere skjønner poenget</h1>
+
+          <aside class="notes">
+            Man sparer plass og koden blir mer oversiktelig, noe som er
+            ganske uvurdelig når koden blir relativt uoversiktelig med
+            callbacks og manglende 'hånd-holding'.
+
+            Ønsker ikke å angripe JS, vi digger JS - vil bare påpeke at
+            det fins en måte å gjøre det bedre på.
+          </aside>
+        </section>
+
+      </section>
+
+      <section>
+
+        <section>
+          <h3>Applikasjonssetup</h3>
+          <img class="fragment" src="images/node1.png"/>
+          <img class="fragment" src="images/node2.png"/>
+          <img class="fragment" src="images/node3.png" style="margin-top: -400px;" >
+          <img class="fragment" src="images/node4.png" style="margin-top: -800px;">
+          <aside class="notes">
+            1 - javascript, legge koden i lib, egen router mappe, egen db-mappe
+            2 - config mappe, MVC-setup, public
+            3 - coffeescript - egen mappe + kompilering? Bibliotek
+            4 - Som dere skjønner, en god del forslag.
+          </aside>
+        </section>
+
+        <section>
+          <h1>Gjør hva du vil</h1>
+          <h2 class="fragment">Men vær <i>litt</i> smart.</h2>
+          <aside class="notes">
+            Følg gjerne guidelines såvidt du føler deg komfortabel med det
+            Separer logikk
+          </aside>
+        </section>
+
+        <section>
+          <h1>Sånn gjør <i>vi</i> det</h1>
+          <img class="fragment" src="images/node5.png" />
+          <aside class="notes">
+            lib - inneholder server-spesifikk kode (modeller, kontrollere, osv)
+            public - statiske assets, kan gjerne genererer via grunt o.l.
+            test - mocha specs
+            Gruntfile
+            app.coffee - main entry point for applikasjonen
+            lib/views/jade
+            helst lib/assets/coffee for klient-kode også
+            ingen kompilert javascript
+          </aside>
+        </section>
+
+        <section>
+          <h3>Verktøy/språk å merke seg</h1>
+          <ul>
+            <li>Grunt</li>
+            <li>mocha</li>
+            <li>connect-assets</li>
+            <li>jade/stylus</li>
+          </ul>
+          <aside class="notes">
+            Grunt: er et byggeverktøy som lar deg automatisere masse, vil
+            demonstrere dette senere.
+            mocha: er et veldig bra test rammeverk som minner om rspec
+            connect-assets automatiserer kompileringen av assets, tenk
+            rails asset pipeline
+            jade: templating-språk skrevet av TJ som spiller godt på lag
+            med express. samme med stylus.
+          </aside>
+        </section>
+
+      </section>
+
+      <section>
+
+        <section>
+          <h1>Client-side coffeescript</h1>
+          <h2>Shit just got real</h2>
+          <aside class="notes">
+            Javascript-apper front end tar av for tiden
+            Utrolig mange rammeverk: angular, backbone, ember, react, polymer et.al.
+            Ække alltid det trengs (simple.js)
+            Hvordan?
+          </aside>
+        </section>
+
+        <section>
+          <h1>Hvordan?</h1>
+          <aside class="notes">
+            teknisk:
+              Kompilering, grunt, connect-assets
+            kodemessig:
+              jQuery-suppe
+              modulær javascript
+          </aside>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Samme approach som modulær javascript</h2>
+          <pre class="fragment">
+          <code class="javascript small">
+var Module = (function () {
+
+  var _privateMethod = function () {
+    // private stuff
+  };
+
+  var publicMethod = function () {
+    _privateMethod();
+  };
+
+  return {
+    publicMethod: publicMethod
+  };
+
+})();
+          </code>
+        </pre>
+        <aside class="notes">
+          scopes, mange paradigmer og konvensjoner
+        </aside>
+        </section>
+
+        <section>
+          <h2>Prototyping</h2>
+          <pre>
+            <code class="javascript small">
+function App() {
+  this.attribute = 'value'
+  this.resource = new Resource()
+  this.method();
+
+  return App;
+}
+
+App.prototype.method = function() {
+  this = that; // ugh
+  this.resource.on('event', (function(event, username) {
+    console.log('Event ' +event+ ' was called with ' +username+ ' as param')
+    that.attribute = 'new value'
+    that.socket.emit('add user', username);
+  });
+}
+            </code>
+          </pre>
+          <aside class="notes">
+            "hjemmesnekra"
+            klasse App med attributter, metode og handler.
+          </aside>
+          <h2>Blir til</h2>
+
+        </section>
+
+        <section>
+          <h2>Klasser!</h2>
+          <pre>
+            <code class="coffeescript medium">
+class App
+
+  constructor: (@attribute) ->
+    @resource = new Resource()
+    @method()
+
+  method: ->
+    @resource.on 'event', (event, username) =>
+      console.log "Event #{event} was invoked with #{username} as param"
+      @attribute = 'new value'
+      @socket.emit 'add user', username
+        </code>
+        </pre>
+        <aside class="notes">
+          Javascript funker, mer oversiktelig med coffeescript.
+        </aside>
+      </section>
+
+        <section>
+          <pre>
+            <code class="coffeescript medium" >
+class Pokemon
+
+  constructor: (@name, @level, @religion, @trainer) ->
+    @initEvents()
+
+  initEvents: ->
+    @.on 'I choose you', =>
+      if @trainer.name == 'Ash Ketchum' then @say 'Fuck off, bro'
+
+  say: (message) ->
+    @.emit 'say', message
+
+@Pokemon = Pokemon # Global variables, ZOMG - beer me!
+            </code>
+          </pre>
+          <aside class="notes">
+            Bruker alltid pokemon. Alle skjønner pokemon.
+            Global pokemon klasse som definerer handler for events
+            Alt defineres innen samme scope, kun klasse-definisjonen er
+            tilgjengelig.
+            - Flyt
+          </aside>
+        </section>
+
+        <section>
+          <h2>Som snakker med hverandre</h2>
+          <pre>
+            <code class="coffeescript small">
+class PokemonManager
+  createPokemonForTrainer: (trainer) ->
+    pokemon = new Pokemon('Pikachu', 69, 'N/A', trainer)
+    pokemon.on 'say', (message) ->
+      pokemon.trainer.trigger 'pokemon:message', {pokemon: pokemon, message: message }
+    trainer.trigger 'pokemon:new', pokemon
+
+class Trainer
+  initHandlers: ->
+    @.on 'pokemon:new', (pokemon) =>
+      @pokemon.push pokemon
+      pokemon.trigger 'I choose you'
+
+    @.on 'pokemon:message', (data) =>
+      if data.pokemon == Pikachu && data.message == @personalInsult then @breakDown()
+
+            </code>
+          </pre>
+          <aside class="notes">
+            Man har klasser som fungerer som meldingshøbber mellom ting
+            de kontrollerer. På den måten trenger ikke klassene vite om
+            noe annet enn seg selv om og sine attributter.
+            - Flyt
+          </aside>
+        </section>
+
+        <section>
+          <h2>Hold up - emit?</h2>
+          <aside class="notes">
+            Det finnes ikke noe innebygd i coffeescript som automatisk gir deg
+            events (node har det), men det er en veldig kjapp mixin evt.
+            et bibliotek som vi bruker. EventEmitter.
+
+            Kan også bruke DOM-elementer og jQuery, samt html5-events.
+          </aside>
+        </section>
+
+        <section>
+          <h2>Event-drevne komponenter</h2>
+          <img src="images/dependencies.jpg">
+          <aside class="notes">
+            Trevor Burnham
+            Kobler fra hverandre funksjonskall og erstatter det med eventer
+            Ikke smart dersom man har library-tendenser
+            Samme gjelder server-side, koble ting fra hverandre med eventer.
+          </aside>
+        </section>
+
+        <section>
+          <h2>Dette</h2>
+
+          <pre>
+            <code class="coffeescript">
+# app.coffee
+chat_server.listen(server)
+
+# lib/chat_server.coffee
+exports.listen = (server) =>
+  @io = require('socket.io')(server)
+
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Kan bli dette</h2>
+          <pre>
+            <code class="coffeescript">
+# app.coffee
+chat_server.trigger 'listen', (server)
+
+# lib/chat_server.coffee
+class ChatServer
+
+  @.on 'listen', (server) =>
+    @io = require('socket.io')(server)
+            </code>
+          </pre>
+          <aside class="notes">
+            Dekobling, mer struktur, slipper mange
+            exports, kan heller trigge events (API mutable),
+            mer forståelig dataflyt
+          </section>
+
+        <section>
+          <h1>Live coding, son!</h1>
+        </section>
+      </section>
+
+        <section>
+          <h2>Mottakelse</h2>
           <p>Noen er ikke så glade i det</p>
           <p>Stort i Rails-miljøet</p>
         </section>
@@ -272,9 +892,16 @@ race 'harald', 'nico', 'geir', 'jonny'
           <h2>Alternativer</h2>
           <p>EcmaScript 6</p>
           <p>TypeScript</p>
-          <p>Baily (Bekker)</p>
+          <p>Bailey</p>
         </section>
 
+        <section>
+          <h1>Spørsmål?</h1>
+        </section>
+
+        <section>
+          <h1>Takk for oss! :)</h1>
+        </section>
       </div> <!-- /.slides -->
 
     </div>
