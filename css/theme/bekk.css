@@ -197,7 +197,7 @@ body:before {
   padding: 0;
   position: absolute;
   top: 15px; left: 15px; right: 15px; bottom: 15px;
-  height: 600px
+  height: 600px;
 }
 
 #repl_source, #repl_results {
