@@ -181,7 +181,7 @@ app.listen(1337)
           </section>
 
           <section>
-            <h1>Helt basic routing</h1>
+            <h2>Helt basic routing</h2>
             <pre>
               <code class="javascript">
 app.get('/', function(req, res) {
@@ -192,7 +192,7 @@ app.get('/', function(req, res) {
           </section>
 
           <section>
-            <h1>Helt basic routing</h1>
+            <h2>Helt basic routing</h2>
             <pre>
               <code class="coffeescript">
 app.get '/', (req, res) ->
@@ -203,8 +203,9 @@ app.get '/', (req, res) ->
 
 
           <section>
+            <h2>Validering</h2>
             <pre>
-              <code class="javascript" style="margin:-400px;">
+              <code class="javascript small">
 validateParams = function(params) {
   for (name in params) {
     value = params[name];
@@ -230,8 +231,9 @@ validateParams = function(params) {
           </section>
 
           <section>
+            <h2>Validering</h2>
             <pre>
-              <code class="coffeescript" style="margin:-400px;">
+              <code class="coffeescript small">
 validateParams = (params) ->
   for name, value of params # object iteration, pretty sweet
     unless value.length > 0
@@ -244,8 +246,9 @@ validateParams = (params) ->
           </section>
 
           <section>
+            <h2>Litt mer avansert</h2>
             <pre>
-              <code class="javascript" style="margin:-400px;">
+              <code class="javascript very-small">
 app.post('/login', function(req, res) {
   var error = validateParams(req.body);
   if (error != null) {
@@ -280,8 +283,9 @@ app.post('/login', function(req, res) {
           </section>
 
           <section>
+            <h2>Litt mer avansert</h2>
             <pre>
-              <code class="coffeescript" style="margin:-400px;">
+              <code class="coffeescript small">
 app.post '/login', (req, res) ->
   error = validateParams(req.body) # remember this guy?
   return res.json JSON.stringify(error) if error?
@@ -310,8 +314,9 @@ app.post '/login', (req, res) ->
           </section>
 
           <section>
+            <h2>Enda litt mer</h2>
             <pre>
-              <code class="javascript" style="margin: -400px;">
+              <code class="javascript small">
 app.post('/signup', function(req, res) {
   var error;
   error = validateParams(req.body);
@@ -359,12 +364,11 @@ app.post('/signup', function(req, res) {
       <section>
 
         <section>
-          <h1>Applikasjonssetup</h1>
+          <h3>Applikasjonssetup</h3>
           <img class="fragment" src="images/node1.png"/>
           <img class="fragment" src="images/node2.png"/>
-          <img class="fragment" src="images/node3.png" style="margin-top: -800px;">
+          <img class="fragment" src="images/node3.png" style="margin-top: -400px;" >
           <img class="fragment" src="images/node4.png" style="margin-top: -800px;">
-          <h2 class="fragment">?</h2>
         </section>
 
         <section>
@@ -374,7 +378,7 @@ app.post('/signup', function(req, res) {
 
         <section>
           <h1>Sånn gjør <i>vi</i> det</h1>
-          <img class="fragment" src="images/node5.png" style="margin: 0 -400px -400px -400px;"/>
+          <img class="fragment" src="images/node5.png" />
         </section>
 
         <section>
@@ -405,27 +409,9 @@ app.post('/signup', function(req, res) {
         </section>
 
         <section>
-          <pre>
-            <code class="javascript">
-function App() {
-  this.attribute = 'value'
-  this.method();
-}
-
-App.prototype.method = function() {
-  this = that;
-  this.resource.on('event', (function() {
-    return function(username) {
-      return that.socket.emit('add user', username);
-    };
-  });
-}
-            </code>
-          </pre>
-        </section>
-        <section>
+          <h2>Samme approach som modulær javascript</h2>
           <pre class="fragment">
-          <code class="javascript">
+          <code class="javascript small">
 var Module = (function () {
 
   var _privateMethod = function () {
@@ -443,13 +429,56 @@ var Module = (function () {
 })();
           </code>
         </pre>
-          <h2 class="fragment">Look familiar?</h2>
         </section>
 
         <section>
-          <h1>Klassebasert >> Prototyping</h1>
+          <h2>Prototyping</h2>
           <pre>
-            <code class="coffeescript">
+            <code class="javascript small">
+function App() {
+  this.attribute = 'value'
+  this.resource = new Resource()
+  this.method();
+
+  return App;
+}
+
+App.prototype.method = function() {
+  this = that; // ugh
+  this.resource.on('event', (function(event, username) {
+    console.log('Event ' +event+ ' was called with ' +username+ ' as param')
+    that.attribute = 'new value'
+    that.socket.emit('add user', username);
+  });
+}
+            </code>
+          </pre>
+          <h2>Blir til</h2>
+
+        </section>
+
+        <section>
+          <h2>Klasser!</h2>
+          <pre>
+            <code class="coffeescript medium">
+class App
+
+  constructor: (@attribute) ->
+    @resource = new Resource()
+    @method()
+
+  method: ->
+    @resource.on 'event', (event, username) =>
+      console.log "Event #{event} was invoked with #{username} as param"
+      @attribute = 'new value'
+      @socket.emit 'add user', username
+    </code>
+    </pre>
+  </section>
+
+        <section>
+          <pre>
+            <code class="coffeescript medium" >
 class Pokemon
 
   constructor: (@name, @level, @religion, @trainer) ->
@@ -457,7 +486,7 @@ class Pokemon
 
   initEvents: ->
     @.on 'I choose you', =>
-      if @trainer == 'Ash Ketchum' then @say 'Fuck off, bro'
+      if @trainer.name == 'Ash Ketchum' then @say 'Fuck off, bro'
 
   say: (message) ->
     @.emit 'say', message
@@ -468,33 +497,40 @@ class Pokemon
         </section>
 
         <section>
+          <h2>Som snakker med hverandre</h2>
           <pre>
-            <code class="coffeescript">
+            <code class="coffeescript small">
+class PokemonManager
+  createPokemonForTrainer: (trainer) ->
+    pokemon = new Pokemon('Pikachu', 69, 'N/A', trainer)
+    pokemon.on 'say', (message) ->
+      pokemon.trainer.trigger 'pokemon:message', {pokemon: pokemon, message: message }
+    trainer.trigger 'pokemon:new', pokemon
+
+class Trainer
+  initHandlers: ->
+    @.on 'pokemon:new', (pokemon) =>
+      @pokemon.push pokemon
+      pokemon.trigger 'I choose you'
+
+    @.on 'pokemon:message', (data) =>
+      if data.pokemon == Pikachu && data.message == @personalInsult then @breakDown()
+
             </code>
           </pre>
         </section>
 
         <section>
-          <pre>
-            <code class="coffeescript">
-            </code>
-          </pre>
+          <h2>Hold up - emit?</h2>
         </section>
 
         <section>
-          <pre>
-            <code class="coffeescript">
-            </code>
-          </pre>
+          <h2>Event-drevne komponenter</h2>
+          <img src="images/dependencies.jpg">
         </section>
 
         <section>
-        </section>
-        <section>
-        </section>
-        <section>
-        </section>
-
+          <h1>Live coding, son!</h1>
         </section>
 
         <section>
