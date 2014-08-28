@@ -136,18 +136,7 @@ loler('harald')
             </pre>
         </section>
 
-        <section>
-          <h2>Stemning i miljøet</h2>
-          <p>Noen er ikke så glade i det</p>
-          <p>Stort i Rails-miljøet</p>
-        </section>
 
-        <section>
-          <h2>Alternativer</h2>
-          <p>EcmaScript 6</p>
-          <p>TypeScript</p>
-          <p>Baily (Bekker)</p>
-        </section>
 
         <section>
           <div class="contents repl_wrapper">
@@ -167,6 +156,358 @@ loler('harald')
 
         <section>
           <iframe src="/CoffeeScript-Try.html" frameborder="0" width="1200" height="600"></iframe>
+        </section>
+
+        <section>
+          <img src="images/business.png" style="background: none; border:none;"/>
+
+          <h1 class="fragment" style="margin-top: -200px;box-sizing: border-box;">It's business time</h1>
+        </section>
+
+        <section>
+          <section>
+            <h1>Coffeescript server-side</h1>
+            <p> Node.js to the rescue</h1>
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript">
+express = require 'express'
+app = express()
+app.listen(1337)
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h1>Helt basic routing</h1>
+            <pre>
+              <code class="javascript">
+app.get('/', function(req, res) {
+  return res.render('index.jade');
+});
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h1>Helt basic routing</h1>
+            <pre>
+              <code class="coffeescript">
+app.get '/', (req, res) ->
+  res.render 'index.jade'
+              </code>
+            </pre>
+          </section>
+
+
+          <section>
+            <pre>
+              <code class="javascript" style="margin:-400px;">
+validateParams = function(params) {
+  for (name in params) {
+    value = params[name];
+    if (!(value.length > 0)) {
+      return {
+        'error': {
+          'message': 'Don\'t just submit an empty form, brah.'
+        }
+      };
+    }
+    if (name === 'username' && !validator.isEmail(value)) {
+      return {
+        'error': {
+          'message': 'Invalid email, brah.'
+        }
+      };
+    }
+  }
+  return null; // No errors, amazing!
+};
+              </code>
+            <pre>
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript" style="margin:-400px;">
+validateParams = (params) ->
+  for name, value of params # object iteration, pretty sweet
+    unless value.length > 0
+      return 'error': 'message': 'Don\'t just submit an empty form, brah.'
+    if name == 'username' && !validator.isEmail(value)
+      return 'error': 'message': 'Invalid email, brah.'
+  null # beer me, brah!
+              </code>
+            <pre>
+          </section>
+
+          <section>
+            <pre>
+              <code class="javascript" style="margin:-400px;">
+app.post('/login', function(req, res) {
+  var error = validateParams(req.body);
+  if (error != null) {
+    return res.json(JSON.stringify(error));
+  }
+  return findUser({
+    where: {
+      username: req.body.username
+    }
+  }).then(function(user) {
+    if (user == null) {
+      throw new Error('Couldn\'t find a user with that email');
+    }
+    return compare(req.body.password, user.password).then(function(result) {
+      if (!result) {
+        throw new Error('Wrong password, brah.');
+      }
+      return res.json(JSON.stringify({
+        'user': user
+      }));
+    });
+  }).fail(function(error) {
+    return res.json(JSON.stringify({
+      'error': {
+        'message': error.message
+      }
+    }));
+  }).done();
+});
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <pre>
+              <code class="coffeescript" style="margin:-400px;">
+app.post '/login', (req, res) ->
+  error = validateParams(req.body) # remember this guy?
+  return res.json JSON.stringify(error) if error?
+
+  findUser(
+    where:
+      username: req.body.username
+  )
+  .then(
+    (user) ->
+      throw new Error('Couldn\'t find a user with that email') unless user?
+      compare(req.body.password, user.password)
+      .then(
+        (result) ->
+          throw new Error('Wrong password, brah.') unless result
+          res.json JSON.stringify('user': user)
+      )
+  )
+  .fail(
+    (error) ->
+      res.json JSON.stringify('error': 'message': error.message)
+  )
+  .done()
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <pre>
+              <code class="javascript" style="margin: -400px;">
+app.post('/signup', function(req, res) {
+  var error;
+  error = validateParams(req.body);
+  if (error != null) {
+    return res.json(JSON.stringify(error));
+  }
+  return findUser({
+    where: {
+      username: req.body.username
+    }
+  }).then(function(user) {
+    if (user) {
+      throw new Error('Username/email already exists.');
+    }
+    return encrypt(10);
+  }).then(function(salt) {
+    return hash(req.body.password, salt);
+  }).then(function(hash) {
+    return createUser({
+      user_id: uuid.v1(),
+      username: req.body.username,
+      password: hash,
+      joined: Date.now()
+    });
+  }).then(function(user) {
+    return res.json(JSON.stringify(user));
+  }).fail(function(error) {
+    return res.json(JSON.stringify({
+      'error': {
+        'message': error.message
+      }
+    }));
+  }).done();
+});
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h1>Okay, dere skjønner poenget</h1>
+        </section>
+
+      </section>
+
+      <section>
+
+        <section>
+          <h1>Applikasjonssetup</h1>
+          <img class="fragment" src="images/node1.png"/>
+          <img class="fragment" src="images/node2.png"/>
+          <img class="fragment" src="images/node3.png" style="margin-top: -800px;">
+          <img class="fragment" src="images/node4.png" style="margin-top: -800px;">
+          <h2 class="fragment">?</h2>
+        </section>
+
+        <section>
+          <h1>Gjør hva du vil</h1>
+          <h2 class="fragment">Men vær <i>litt</i> smart.</h2>
+        </section>
+
+        <section>
+          <h1>Sånn gjør <i>vi</i> det</h1>
+          <img class="fragment" src="images/node5.png" style="margin: 0 -400px -400px -400px;"/>
+        </section>
+
+        <section>
+          <h3>Verktøy/språk å merke seg</h1>
+          <ul>
+            <li>Grunt</li>
+            <li>mocha</li>
+            <li>connect-assets</li>
+            <li>jade</li>
+            <li>stylus</li>
+          </ul>
+        </section>
+
+      </section>
+
+      <section>
+
+        <section>
+          <h1>Client-side coffeescript</h1>
+          <h2>Shit just got real</h2>
+        </section>
+
+        <section>
+          <h1>Hvordan?</h1>
+          <aside class="notes">
+            Kompilering, grunt, connect-assets
+          </aside>
+        </section>
+
+        <section>
+          <pre>
+            <code class="javascript">
+function App() {
+  this.attribute = 'value'
+  this.method();
+}
+
+App.prototype.method = function() {
+  this = that;
+  this.resource.on('event', (function() {
+    return function(username) {
+      return that.socket.emit('add user', username);
+    };
+  });
+}
+            </code>
+          </pre>
+        </section>
+        <section>
+          <pre class="fragment">
+          <code class="javascript">
+var Module = (function () {
+
+  var _privateMethod = function () {
+    // private stuff
+  };
+
+  var publicMethod = function () {
+    _privateMethod();
+  };
+
+  return {
+    publicMethod: publicMethod
+  };
+
+})();
+          </code>
+        </pre>
+          <h2 class="fragment">Look familiar?</h2>
+        </section>
+
+        <section>
+          <h1>Klassebasert >> Prototyping</h1>
+          <pre>
+            <code class="coffeescript">
+class Pokemon
+
+  constructor: (@name, @level, @religion, @trainer) ->
+    @initEvents()
+
+  initEvents: ->
+    @.on 'I choose you', =>
+      if @trainer == 'Ash Ketchum' then @say 'Fuck off, bro'
+
+  say: (message) ->
+    @.emit 'say', message
+
+@Pokemon = Pokemon # Global variables, ZOMG - beer me!
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <pre>
+            <code class="coffeescript">
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <pre>
+            <code class="coffeescript">
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <pre>
+            <code class="coffeescript">
+            </code>
+          </pre>
+        </section>
+
+        <section>
+        </section>
+        <section>
+        </section>
+        <section>
+        </section>
+
+        </section>
+
+        <section>
+          <h2>Stemning i miljøet</h2>
+          <p>Noen er ikke så glade i det</p>
+          <p>Stort i Rails-miljøet</p>
+        </section>
+
+        <section>
+          <h2>Alternativer</h2>
+          <p>EcmaScript 6</p>
+          <p>TypeScript</p>
+          <p>Baily (Bekker)</p>
         </section>
 
       </div> <!-- /.slides -->
