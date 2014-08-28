@@ -52,18 +52,112 @@
         </section>
 
         <section>
-          <h1>Hvorfor Coffeescript?</h1>
-          <p><em>"CoffeeScript is an attempt to expose the good parts of JavaScript in a simple way."</em></p>
-          <p>coffeescript.org</p>
+          <h1>Hva?</h1>
+          <p>Programmeringsspråk som kompilerer til Javascript</p>
+
+          <aside class="notes">
+            Kompilering til js; kan brukes med alle vanlige javascript bibliotek
+          </aside>
+
         </section>
 
+        <section>
+          <h1>Hvorfor?</h1>
+          <div class="fragment">
+            <p><em>"CoffeeScript is an attempt to expose the good parts of JavaScript in a simple way."</em></p>
+            <p>coffeescript.org</p>
+          </div>
 
+          <aside class="notes">
+            Javascript har noen kinks, variabler lekker scope, masse bruk av anynome funksjoner <br>
+            Kompilering til js; kan brukes med alle vanlige javascript bibliotek
+          </aside>
+        </section>
+
+        <section>
+          <img src="images/JavaScript-the-good-parts.jpg" alt="">
+        </section>
+
+        <section>
+          <h2>Hvorfor?</h2>
+          <ul>
+            <li>Få fram Javascripts gode sider</li>
+            <li>Fikse Javascripts rare sider</li
+            >
+            <li>Enklere og penere syntaks</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Syntaks</h2>
+          <ul>
+            <li>Indent-basert</li>
+            <li>Parentes og krøllparentes droppes i de fleste tilfeller</li>
+            <li>Semikolon trengs ikke</li>
+          </ul>
+        </section>
+
+        <section>
+
+          <section>
+            <p>Javascript</p>
+            <pre>
+              <code class="javascript">
+$(function() {
+  console.log("Ready!");
+});
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <p>Coffeescript</p>
+            <pre>
+              <code class="coffeescript">
+$ ->
+  console.log "Ready!"
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <pre>
+              <code class="coffeescript">
+loler = (name) ->
+  console.log "LOL, #{name}!"
+
+loler('harald')
+
+              </code>
+            </pre>
+        </section>
+
+        <section>
+          <div class="contents repl_wrapper">
+        <div class="code">
+          <div class="screenshadow tl"></div>
+          <div class="screenshadow tr"></div>
+          <div class="screenshadow bl"></div>
+          <div class="screenshadow br"></div>
+          <div id="repl_source_wrap">
+            <textarea id="repl_source" rows="100" spellcheck="false" data-emoji_font="true" style="font-family: Monaco, Consolas, 'Lucida Console', monospace, 'Segoe UI Emoji', 'Segoe UI Symbol', Symbola, EmojiSymbols !important;">alert "Hello CoffeeScript!"</textarea>
+          </div>
+          <div id="repl_results_wrap"><pre id="repl_results" class="">
+</pre></div>
+          <br class="clear">
+        </div>
       </div>
+
+        </section>
+
+      </div> <!-- /.slides -->
 
     </div>
 
     <script src="lib/js/head.min.js"></script>
     <script src="js/reveal.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
     <script>
 
@@ -94,6 +188,93 @@
       });
 
     </script>
+
+    <script type="text/coffeescript">
+      sourceFragment = "try:"
+
+      # Set up the compilation function, to run when you stop typing.
+      compileSource = ->
+        source = $('#repl_source').val()
+        results = $('#repl_results')
+        window.compiledJS = ''
+        try
+          window.compiledJS = CoffeeScript.compile source, bare: on
+          el = results[0]
+          if el.innerText
+            el.innerText = window.compiledJS
+          else
+            results.text(window.compiledJS)
+          results.removeClass 'error'
+          $('.minibutton.run').removeClass 'error'
+        catch {location, message}
+          if location?
+            message = "Error on line #{location.first_line + 1}: #{message}"
+          results.text(message).addClass 'error'
+          $('.minibutton.run').addClass 'error'
+
+        # Update permalink
+        $('#repl_permalink').attr 'href', "##{sourceFragment}#{encodeURIComponent source}"
+
+      # Listen for keypresses and recompile.
+      $('#repl_source').keyup -> compileSource()
+
+      # Eval the compiled js.
+      evalJS = ->
+        try
+          eval window.compiledJS
+        catch error then alert error
+
+      # Load the console with a string of CoffeeScript.
+      window.loadConsole = (coffee) ->
+        $('#repl_source').val coffee
+        compileSource()
+        $('.navigation.try').addClass('active')
+        false
+
+      # Helper to hide the menus.
+      closeMenus = ->
+        $('.navigation.active').removeClass 'active'
+
+      $('.minibutton.run').click -> evalJS()
+
+      # Bind navigation buttons to open the menus.
+      $('.navigation').click (e) ->
+        return if e.target.tagName.toLowerCase() is 'a'
+        return false if $(e.target).closest('.repl_wrapper').length
+        if $(this).hasClass('active')
+          closeMenus()
+        else
+          closeMenus()
+          $(this).addClass 'active'
+        false
+
+      # Dismiss console if Escape pressed or click falls outside console
+      # Trigger Run button on Ctrl-Enter
+      $(document.body)
+        .keydown (e) ->
+          closeMenus() if e.which == 27
+          evalJS() if e.which == 13 and (e.metaKey or e.ctrlKey) and $('.minibutton.run:visible').length
+        .click (e) ->
+          return false if $(e.target).hasClass('minibutton')
+          closeMenus()
+
+      $('#open_webchat').click ->
+        $(this).replaceWith $('<iframe src="http://webchat.freenode.net/?channels=coffeescript" width="625" height="400"></iframe>')
+
+      $("#repl_permalink").click (e) ->
+          window.location = $(this).attr("href")
+          false
+
+      # If source code is included in location.hash, display it.
+      hash = decodeURIComponent location.hash.replace(/^#/, '')
+      if hash.indexOf(sourceFragment) == 0
+          src = hash.substr sourceFragment.length
+          loadConsole src
+
+      compileSource()
+
+    </script>
+    <script src="http://coffeescript.org/extras/coffee-script.js"></script>
 
   </body>
 </html>
